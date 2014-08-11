@@ -1,18 +1,18 @@
 /*
  * The MIT License
- * 
+ *
  * Copyright (c) 2013, Sebastian Sdorra
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -28,7 +28,7 @@
  * @ngdoc object
  * @name adf.dashboardProvider
  * @description
- * 
+ *
  * The dashboardProvider can be used to register structures and widgets.
  */
 angular.module('adf.provider', [])
@@ -49,7 +49,7 @@ angular.module('adf.provider', [])
     * @name adf.dashboardProvider#widget
     * @methodOf adf.dashboardProvider
     * @description
-    * 
+    *
     * Registers a new widget.
     *
     * @param {string} name of the widget
@@ -60,15 +60,15 @@ angular.module('adf.provider', [])
     *   - `title` - `{string=}` - The title of the widget.
     *   - `description` - `{string=}` - Description of the widget.
     *   - `config` - `{object}` - Predefined widget configuration.
-    *   - `controller` - `{string=|function()=}` - Controller fn that should be 
-    *      associated with newly created scope of the widget or the name of a 
-    *      {@link http://docs.angularjs.org/api/angular.Module#controller registered controller} 
+    *   - `controller` - `{string=|function()=}` - Controller fn that should be
+    *      associated with newly created scope of the widget or the name of a
+    *      {@link http://docs.angularjs.org/api/angular.Module#controller registered controller}
     *      if passed as a string.
     *   - `template` - `{string=|function()=}` - html template as a string.
     *   - `templateUrl` - `{string=}` - path to an html template.
     *   - `reload` - `{boolean=}` - true if the widget could be reloaded. The default is false.
     *   - `resolve` - `{Object.<string, function>=}` - An optional map of dependencies which should
-    *      be injected into the controller. If any of these dependencies are promises, the widget 
+    *      be injected into the controller. If any of these dependencies are promises, the widget
     *      will wait for them all to be resolved or one to be rejected before the controller is
     *      instantiated.
     *      If all the promises are resolved successfully, the values of the resolved promises are
@@ -85,7 +85,7 @@ angular.module('adf.provider', [])
     *      - `template` - `{string=|function()=}` - Same as above, but for the edit mode of the widget.
     *      - `templateUrl` - `{string=}` - Same as above, but for the edit mode of the widget.
     *      - `resolve` - `{Object.<string, function>=}` - Same as above, but for the edit mode of the widget.
-    *      - `reload` - {boolean} - true if the widget should be reloaded, after the edit mode is closed. 
+    *      - `reload` - {boolean} - true if the widget should be reloaded, after the edit mode is closed.
     *        Default is true.
     *
     * @returns {Object} self
@@ -106,7 +106,7 @@ angular.module('adf.provider', [])
     * @name adf.dashboardProvider#structure
     * @methodOf adf.dashboardProvider
     * @description
-    * 
+    *
     * Registers a new structure.
     *
     * @param {string} name of the structure
@@ -118,24 +118,24 @@ angular.module('adf.provider', [])
     *     - `styleClass` - `{string}` - CSS Class of the row.
     *     - `columns` - `{Array.<Object>}` - Columns of the row.
     *       - `styleClass` - `{string}` - CSS Class of the column.
-    * 
+    *
     * @returns {Object} self
     */
     this.structure = function(name, structure){
       structures[name] = structure;
       return this;
     };
-    
+
    /**
     * @ngdoc method
     * @name adf.dashboardProvider#messageTemplate
     * @methodOf adf.dashboardProvider
     * @description
-    * 
+    *
     * Changes the template for messages.
     *
     * @param {string} template for messages.
-    * 
+    *
     * @returns {Object} self
     */
     this.messageTemplate = function(template){
@@ -148,12 +148,12 @@ angular.module('adf.provider', [])
     * @name adf.dashboardProvider#loadingTemplate
     * @methodOf adf.dashboardProvider
     * @description
-    * 
-    * Changes the template which is displayed as 
+    *
+    * Changes the template which is displayed as
     * long as the widget resources are not resolved.
     *
     * @param {string} loading template
-    * 
+    *
     * @returns {Object} self
     */
     this.loadingTemplate = function(template){
@@ -165,7 +165,7 @@ angular.module('adf.provider', [])
     * @ngdoc object
     * @name adf.dashboard
     * @description
-    * 
+    *
     * The dashboard holds all structures and widgets.
     *
     * @returns {Object} self
@@ -178,5 +178,41 @@ angular.module('adf.provider', [])
         loadingTemplate: loadingTemplate
       };
     };
+  })
+.provider("adfEditWidgetService",function(){
 
-  });
+    var controller = function(){
+        console.log('This is a default controller you should override this');
+    };
+
+return {
+
+    setController: function(controllerName){
+        controller = controllerName;
+    },
+
+    $get : function($controller){
+
+        return {
+
+            edit:function(scope){
+                $controller( controller , { $scope:scope } );
+            },
+
+            save:function(scope){
+                var widget = scope.widget;
+                if (widget.edit && widget.edit.reload){
+                  // reload content after edit dialog is closed
+                  scope.$broadcast('widgetConfigChanged');
+                }
+
+            },
+            cancel:function(scope){
+                console.log('hey I got cancelled');
+            }
+        }
+    }
+}
+
+});
+

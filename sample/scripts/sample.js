@@ -26,12 +26,16 @@
 angular.module('sample', [
   'adf', 'sample.widgets.news', 'sample.widgets.randommsg',
   'sample.widgets.weather', 'sample.widgets.markdown',
-  'sample.widgets.linklist', 'sample.widgets.github', 
+  'sample.widgets.linklist', 'sample.widgets.github',
   'LocalStorageModule', 'structures', 'sample-01', 'sample-02', 'ngRoute'
 ])
-.config(function($routeProvider, localStorageServiceProvider){
+.config(function($routeProvider, localStorageServiceProvider, adfEditWidgetServiceProvider){
+
   localStorageServiceProvider.setPrefix('adf');
-  
+
+  //Configure the editing behavior
+  adfEditWidgetServiceProvider.setController('editWidgetController');
+
   $routeProvider.when('/sample/01', {
     templateUrl: 'partials/sample.html',
     controller: 'sample01Ctrl'
@@ -43,23 +47,44 @@ angular.module('sample', [
   .otherwise({
     redirectTo: '/sample/01'
   });
-  
+
+})
+.controller('editWidgetController',function( $scope, $modal, adfEditWidgetService){
+
+          var editScope = $scope.$new();
+
+          var opts = {
+            scope: editScope,
+            templateUrl: '../src/templates/widget-edit.html'
+          };
+
+          var instance = $modal.open(opts);
+
+          $scope.cancelEdits = function() {
+            console.log('Cancel the edits');
+          }
+
+          $scope.saveEdits = function() {
+            instance.close();
+            editScope.$destroy();
+            adfEditWidgetService.save($scope);
+          };
 })
 .controller('navigationCtrl', function($scope, $location){
-  
+
   $scope.navCollapsed = true;
-  
+
   $scope.toggleNav = function(){
     $scope.navCollapsed = !$scope.navCollapsed;
   };
-  
-  $scope.$on('$routeChangeStart', function() { 
+
+  $scope.$on('$routeChangeStart', function() {
     $scope.navCollapsed = true;
   });
-  
+
   $scope.navClass = function(page) {
     var currentRoute = $location.path().substring(1) || 'Sample 01';
     return page === currentRoute || new RegExp(page).test(currentRoute) ? 'active' : '';
   };
-  
+
 });
