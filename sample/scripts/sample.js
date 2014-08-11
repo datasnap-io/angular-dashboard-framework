@@ -29,12 +29,13 @@ angular.module('sample', [
   'sample.widgets.linklist', 'sample.widgets.github',
   'LocalStorageModule', 'structures', 'sample-01', 'sample-02', 'ngRoute'
 ])
-.config(function($routeProvider, localStorageServiceProvider, adfEditWidgetServiceProvider){
+.config(function($routeProvider, localStorageServiceProvider, adfWidgetServiceProvider){
 
   localStorageServiceProvider.setPrefix('adf');
 
   //Configure the editing behavior
-  adfEditWidgetServiceProvider.setController('editWidgetController');
+  adfWidgetServiceProvider
+    .editController('editWidgetController');
 
   $routeProvider.when('/sample/01', {
     templateUrl: 'partials/sample.html',
@@ -49,15 +50,21 @@ angular.module('sample', [
   });
 
 })
-.controller('editWidgetController',function( $scope, $modal, adfEditWidgetService){
+.controller('editWidgetController',function( $scope, $modal, adfWidgetService){
 
+          //Build scope
           var editScope = $scope.$new();
 
+          //if this is an add
+          //set the scope to the current list of widgets
+
+          //Setup modal
           var opts = {
             scope: editScope,
             templateUrl: '../src/templates/widget-edit.html'
           };
 
+          //Instantiate Modal
           var instance = $modal.open(opts);
 
           $scope.cancelEdits = function() {
@@ -67,7 +74,7 @@ angular.module('sample', [
           $scope.saveEdits = function() {
             instance.close();
             editScope.$destroy();
-            adfEditWidgetService.save($scope);
+            adfWidgetService.save($scope);
           };
 })
 .controller('navigationCtrl', function($scope, $location){

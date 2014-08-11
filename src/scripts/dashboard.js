@@ -39,7 +39,7 @@
 'use strict';
 
 angular.module('adf')
-  .directive('adfDashboard', function($rootScope, $log, $modal, dashboard, templatePathRoot){
+  .directive('adfDashboard', function($rootScope, $log, $modal, adfDashboardService, templatePathRoot){
 
     function copyWidgets(source, target){
       if ( source.widgets && source.widgets.length > 0 ){
@@ -87,7 +87,7 @@ angular.module('adf')
 
     function createConfiguration(type){
       var cfg = {};
-      var config = dashboard.widgets[type].config;
+      var config = adfDashboardService.widgets[type].config;
       if (config){
         cfg = angular.copy(config);
       }
@@ -120,7 +120,7 @@ angular.module('adf')
         var model = $scope.adfModel;
         if ( ! model || ! model.rows ){
           var structureName = $scope.structure;
-          var structure = dashboard.structures[structureName];
+          var structure = adfDashboardService.structures[structureName];
           if (structure){
             if (model){
               model.rows = angular.copy(structure).rows;
@@ -162,11 +162,12 @@ angular.module('adf')
         // edit dashboard settings
         $scope.editDashboardDialog = function(){
           var editDashboardScope = $scope.$new();
-          editDashboardScope.structures = dashboard.structures;
+          editDashboardScope.structures = adfDashboardService.structures;
           var instance = $modal.open({
             scope: editDashboardScope,
             templateUrl: templatePathRoot+'/dashboard-edit.html'
           });
+
           $scope.changeStructure = function(name, structure){
             $log.info('change structure to ' + name);
             changeStructure(model, structure);
@@ -180,12 +181,13 @@ angular.module('adf')
         // add widget dialog
         $scope.addWidgetDialog = function(){
           var addScope = $scope.$new();
-          addScope.widgets = dashboard.widgets;
+          addScope.widgets = adfDashboardService.widgets;
           var opts = {
             scope: addScope,
             templateUrl: templatePathRoot+'/widget-add.html'
           };
           var instance = $modal.open(opts);
+
           addScope.addWidget = function(widget){
             var w = {
               type: widget,
@@ -196,6 +198,7 @@ angular.module('adf')
 
             addScope.$destroy();
           };
+
           addScope.closeDialog = function(){
             instance.close();
             addScope.$destroy();

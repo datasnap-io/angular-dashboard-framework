@@ -25,12 +25,12 @@
 'use strict';
 
 angular.module('adf')
-  .directive('adfWidget', function($log, $modal, dashboard, adfEditWidgetService) {
+  .directive('adfWidget', function($log, $modal, adfDashboardService, adfWidgetService) {
 
     function preLink($scope, $element, $attr){
       var definition = $scope.definition;
       if (definition) {
-        var w = dashboard.widgets[definition.type];
+        var w = adfDashboardService.widgets[definition.type];
         if (w) {
           // pass title
           if (!definition.title){
@@ -89,7 +89,7 @@ angular.module('adf')
 
         // bind edit function
         $scope.edit = function() {
-          adfEditWidgetService.edit($scope);
+          adfWidgetService.edit($scope);
         };
 
       } else {

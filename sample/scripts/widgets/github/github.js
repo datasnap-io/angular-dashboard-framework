@@ -1,18 +1,18 @@
 /*
  * The MIT License
- * 
+ *
  * Copyright (c) 2013, Sebastian Sdorra
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -26,7 +26,7 @@
 
 angular.module('sample.widgets.github', ['adf.provider', 'highcharts-ng'])
   .value('githubApiUrl', 'https://api.github.com/repos/')
-  .config(function(dashboardProvider){
+  .config(function(adfDashboardServiceProvider){
     // template object for github widgets
     var widget = {
       templateUrl: 'scripts/widgets/github/github.html',
@@ -42,9 +42,9 @@ angular.module('sample.widgets.github', ['adf.provider', 'highcharts-ng'])
         templateUrl: 'scripts/widgets/github/edit.html'
       }
     };
-    
+
     // register github template by extending the template object
-    dashboardProvider
+    adfDashboardServiceProvider
       .widget('githubHistory', angular.extend({
         title: 'Github History',
         description: 'Display the commit history of a GitHub project as chart',
@@ -55,7 +55,7 @@ angular.module('sample.widgets.github', ['adf.provider', 'highcharts-ng'])
         description: 'Displays the commits per author as pie chart',
         controller: 'githubAuthorCtrl'
         }, widget));
-        
+
   })
   .service('githubService', function($q, $http, githubApiUrl){
     return {
@@ -78,24 +78,24 @@ angular.module('sample.widgets.github', ['adf.provider', 'highcharts-ng'])
     };
   })
   .controller('githubHistoryCtrl', function($scope, config, commits){
-    
+
     function parseDate(input) {
       var parts = input.split('-');
       return Date.UTC(parts[0], parts[1]-1, parts[2]);
     }
-    
+
     var data = {};
     angular.forEach(commits, function(commit){
       var day = commit.commit.author.date;
       day = day.substring(0, day.indexOf('T'));
-      
+
       if (data[day]){
         data[day]++;
       } else {
         data[day] = 1;
       }
     });
-    
+
     var seriesData = [];
     angular.forEach(data, function(count, day){
       seriesData.push([parseDate(day), count]);
@@ -103,8 +103,8 @@ angular.module('sample.widgets.github', ['adf.provider', 'highcharts-ng'])
     seriesData.sort(function(a, b){
       return a[0] - b[0];
     });
-    
-    if ( commits ){    
+
+    if ( commits ){
       $scope.chartConfig = {
         chart: {
           type: 'spline'
@@ -127,10 +127,10 @@ angular.module('sample.widgets.github', ['adf.provider', 'highcharts-ng'])
         }]
       };
     }
-    
+
   })
   .controller('githubAuthorCtrl', function($scope, config, commits){
-    
+
     var data = {};
     angular.forEach(commits, function(commit){
       var author = commit.commit.author.name;
@@ -140,7 +140,7 @@ angular.module('sample.widgets.github', ['adf.provider', 'highcharts-ng'])
         data[author] = 1;
       }
     });
-    
+
     var seriesData = [];
     angular.forEach(data, function(count, author){
       seriesData.push([author, count]);
@@ -157,8 +157,8 @@ angular.module('sample.widgets.github', ['adf.provider', 'highcharts-ng'])
         selected: true
       };
     }
-    
-    if ( commits ){    
+
+    if ( commits ){
       $scope.chartConfig = {
         chart: {
           plotBackgroundColor: null,
@@ -187,5 +187,5 @@ angular.module('sample.widgets.github', ['adf.provider', 'highcharts-ng'])
         }]
       };
     }
-    
+
   });

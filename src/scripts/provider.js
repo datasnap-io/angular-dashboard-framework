@@ -32,7 +32,7 @@
  * The dashboardProvider can be used to register structures and widgets.
  */
 angular.module('adf.provider', [])
-  .provider('dashboard', function(){
+  .provider('adfDashboardService', function(){
 
     var widgets = {};
     var structures = {};
@@ -43,176 +43,191 @@ angular.module('adf.provider', [])
           <span class="sr-only">loading ...</span>\n\
         </div>\n\
       </div>';
+    var addWidgetController = function(){};
 
-   /**
-    * @ngdoc method
-    * @name adf.dashboardProvider#widget
-    * @methodOf adf.dashboardProvider
-    * @description
-    *
-    * Registers a new widget.
-    *
-    * @param {string} name of the widget
-    * @param {object} widget to be registered.
-    *
-    *   Object properties:
-    *
-    *   - `title` - `{string=}` - The title of the widget.
-    *   - `description` - `{string=}` - Description of the widget.
-    *   - `config` - `{object}` - Predefined widget configuration.
-    *   - `controller` - `{string=|function()=}` - Controller fn that should be
-    *      associated with newly created scope of the widget or the name of a
-    *      {@link http://docs.angularjs.org/api/angular.Module#controller registered controller}
-    *      if passed as a string.
-    *   - `template` - `{string=|function()=}` - html template as a string.
-    *   - `templateUrl` - `{string=}` - path to an html template.
-    *   - `reload` - `{boolean=}` - true if the widget could be reloaded. The default is false.
-    *   - `resolve` - `{Object.<string, function>=}` - An optional map of dependencies which should
-    *      be injected into the controller. If any of these dependencies are promises, the widget
-    *      will wait for them all to be resolved or one to be rejected before the controller is
-    *      instantiated.
-    *      If all the promises are resolved successfully, the values of the resolved promises are
-    *      injected.
-    *
-    *      The map object is:
-    *      - `key` – `{string}`: a name of a dependency to be injected into the controller.
-    *      - `factory` - `{string|function}`: If `string` then it is an alias for a service.
-    *        Otherwise if function, then it is {@link http://docs.angularjs.org/api/AUTO.$injector#invoke injected}
-    *        and the return value is treated as the dependency. If the result is a promise, it is
-    *        resolved before its value is injected into the controller.
-    *   - `edit` - `{object}` - Edit modus of the widget.
-    *      - `controller` - `{string=|function()=}` - Same as above, but for the edit mode of the widget.
-    *      - `template` - `{string=|function()=}` - Same as above, but for the edit mode of the widget.
-    *      - `templateUrl` - `{string=}` - Same as above, but for the edit mode of the widget.
-    *      - `resolve` - `{Object.<string, function>=}` - Same as above, but for the edit mode of the widget.
-    *      - `reload` - {boolean} - true if the widget should be reloaded, after the edit mode is closed.
-    *        Default is true.
-    *
-    * @returns {Object} self
-    */
-    this.widget = function(name, widget){
-      var w = angular.extend({reload: false}, widget)
-      if ( w.edit ){
-        var edit = {reload: true};
-        angular.extend(edit, w.edit);
-        w.edit = edit;
-      }
-      widgets[name] = w;
-      return this;
+    return {
+
+        /**
+        * @ngdoc method
+        * @name adf.dashboardProvider#widget
+        * @methodOf adf.dashboardProvider
+        * @description
+        *
+        * Registers a new widget.
+        *
+        * @param {string} name of the widget
+        * @param {object} widget to be registered.
+        *
+        *   Object properties:
+        *
+        *   - `title` - `{string=}` - The title of the widget.
+        *   - `description` - `{string=}` - Description of the widget.
+        *   - `config` - `{object}` - Predefined widget configuration.
+        *   - `controller` - `{string=|function()=}` - Controller fn that should be
+        *      associated with newly created scope of the widget or the name of a
+        *      {@link http://docs.angularjs.org/api/angular.Module#controller registered controller}
+        *      if passed as a string.
+        *   - `template` - `{string=|function()=}` - html template as a string.
+        *   - `templateUrl` - `{string=}` - path to an html template.
+        *   - `reload` - `{boolean=}` - true if the widget could be reloaded. The default is false.
+        *   - `resolve` - `{Object.<string, function>=}` - An optional map of dependencies which should
+        *      be injected into the controller. If any of these dependencies are promises, the widget
+        *      will wait for them all to be resolved or one to be rejected before the controller is
+        *      instantiated.
+        *      If all the promises are resolved successfully, the values of the resolved promises are
+        *      injected.
+        *
+        *      The map object is:
+        *      - `key` – `{string}`: a name of a dependency to be injected into the controller.
+        *      - `factory` - `{string|function}`: If `string` then it is an alias for a service.
+        *        Otherwise if function, then it is {@link http://docs.angularjs.org/api/AUTO.$injector#invoke injected}
+        *        and the return value is treated as the dependency. If the result is a promise, it is
+        *        resolved before its value is injected into the controller.
+        *   - `edit` - `{object}` - Edit modus of the widget.
+        *      - `controller` - `{string=|function()=}` - Same as above, but for the edit mode of the widget.
+        *      - `template` - `{string=|function()=}` - Same as above, but for the edit mode of the widget.
+        *      - `templateUrl` - `{string=}` - Same as above, but for the edit mode of the widget.
+        *      - `resolve` - `{Object.<string, function>=}` - Same as above, but for the edit mode of the widget.
+        *      - `reload` - {boolean} - true if the widget should be reloaded, after the edit mode is closed.
+        *        Default is true.
+        *
+        * @returns {Object} self
+        */
+        widget : function(name, widget){
+          var w = angular.extend({reload: false}, widget)
+          if ( w.edit ){
+            var edit = {reload: true};
+            angular.extend(edit, w.edit);
+            w.edit = edit;
+          }
+          widgets[name] = w;
+          return this;
+        },
+
+        /**
+        * @ngdoc method
+        * @name adf.dashboardProvider#structure
+        * @methodOf adf.dashboardProvider
+        * @description
+        *
+        * Registers a new structure.
+        *
+        * @param {string} name of the structure
+        * @param {object} structure to be registered.
+        *
+        *   Object properties:
+        *
+        *   - `rows` - `{Array.<Object>}` - Rows of the dashboard structure.
+        *     - `styleClass` - `{string}` - CSS Class of the row.
+        *     - `columns` - `{Array.<Object>}` - Columns of the row.
+        *       - `styleClass` - `{string}` - CSS Class of the column.
+        *
+        * @returns {Object} self
+        */
+        structure : function(name, structure){
+          structures[name] = structure;
+          return this;
+        },
+
+        /**
+        * @ngdoc method
+        * @name adf.dashboardProvider#messageTemplate
+        * @methodOf adf.dashboardProvider
+        * @description
+        *
+        * Changes the template for messages.
+        *
+        * @param {string} template for messages.
+        *
+        * @returns {Object} self
+        */
+
+        messageTemplate : function(template){
+          messageTemplate = template;
+          return this;
+        },
+
+           /**
+        * @ngdoc method
+        * @name adf.dashboardProvider#loadingTemplate
+        * @methodOf adf.dashboardProvider
+        * @description
+        *
+        * Changes the template which is displayed as
+        * long as the widget resources are not resolved.
+        *
+        * @param {string} loading template
+        *
+        * @returns {Object} self
+        */
+        loadingTemplate : function(template){
+          loadingTemplate = template;
+          return this;
+        },
+
+        addController: function(controllerName){
+            addWidgetController = controllerName;
+        },
+
+        /**
+        * @ngdoc object
+        * @name adf.dashboard
+        * @description
+        *
+        * The dashboard holds all structures and widgets.
+        *
+        * @returns {Object} self
+        */
+        $get : function(){
+          return {
+            widgets: widgets,
+            structures: structures,
+            messageTemplate: messageTemplate,
+            loadingTemplate: loadingTemplate
+          };
+        }
     };
 
-   /**
-    * @ngdoc method
-    * @name adf.dashboardProvider#structure
-    * @methodOf adf.dashboardProvider
-    * @description
-    *
-    * Registers a new structure.
-    *
-    * @param {string} name of the structure
-    * @param {object} structure to be registered.
-    *
-    *   Object properties:
-    *
-    *   - `rows` - `{Array.<Object>}` - Rows of the dashboard structure.
-    *     - `styleClass` - `{string}` - CSS Class of the row.
-    *     - `columns` - `{Array.<Object>}` - Columns of the row.
-    *       - `styleClass` - `{string}` - CSS Class of the column.
-    *
-    * @returns {Object} self
-    */
-    this.structure = function(name, structure){
-      structures[name] = structure;
-      return this;
-    };
-
-   /**
-    * @ngdoc method
-    * @name adf.dashboardProvider#messageTemplate
-    * @methodOf adf.dashboardProvider
-    * @description
-    *
-    * Changes the template for messages.
-    *
-    * @param {string} template for messages.
-    *
-    * @returns {Object} self
-    */
-    this.messageTemplate = function(template){
-      messageTemplate = template;
-      return this;
-    };
-
-   /**
-    * @ngdoc method
-    * @name adf.dashboardProvider#loadingTemplate
-    * @methodOf adf.dashboardProvider
-    * @description
-    *
-    * Changes the template which is displayed as
-    * long as the widget resources are not resolved.
-    *
-    * @param {string} loading template
-    *
-    * @returns {Object} self
-    */
-    this.loadingTemplate = function(template){
-      loadingTemplate = template;
-      return this;
-    };
-
-   /**
-    * @ngdoc object
-    * @name adf.dashboard
-    * @description
-    *
-    * The dashboard holds all structures and widgets.
-    *
-    * @returns {Object} self
-    */
-    this.$get = function(){
-      return {
-        widgets: widgets,
-        structures: structures,
-        messageTemplate: messageTemplate,
-        loadingTemplate: loadingTemplate
-      };
-    };
   })
-.provider("adfEditWidgetService",function(){
-
-    var controller = function(){
+.provider("adfWidgetService",function(){
+    var defaultCtrl = function(){
         console.log('This is a default controller you should override this');
-    };
-
-return {
-
-    setController: function(controllerName){
-        controller = controllerName;
     },
+    editController = defaultCtrl;
 
-    $get : function($controller){
+    return {
 
-        return {
+        editController: function(controllerName){
+            editController = controllerName;
+        },
 
-            edit:function(scope){
-                $controller( controller , { $scope:scope } );
-            },
+        $get : function($controller){
 
-            save:function(scope){
-                var widget = scope.widget;
-                if (widget.edit && widget.edit.reload){
-                  // reload content after edit dialog is closed
-                  scope.$broadcast('widgetConfigChanged');
+            return {
+
+
+
+                edit:function(scope){
+                    $controller( editController , { $scope:scope } );
+                },
+
+                delete:function(scope){
+                    console.log('delete got called');
+                },
+
+                save:function(scope){
+                    var widget = scope.widget;
+                    if (widget.edit && widget.edit.reload){
+                      // reload content after edit dialog is closed
+                      scope.$broadcast('widgetConfigChanged');
+                    }
+                },
+                cancel:function(scope){
+                    console.log('hey I got cancelled');
                 }
-
-            },
-            cancel:function(scope){
-                console.log('hey I got cancelled');
             }
         }
     }
-}
 
 });
 
