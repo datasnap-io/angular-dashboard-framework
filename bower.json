@@ -1,8 +1,18 @@
 {
   "name": "angular-dashboard-framework",
   "version": "0.1.0",
-  "main": "sample/components",
+  "main": "dist/angular-dashboard-framework.min.js",
+
+   "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "/bower_modules",
+    "test",
+    "tests"
+  ],
   "dependencies": {
+
     "angular": "1.2.18",
     "angular-route": "1.2.18",
     "angular-bootstrap": "~0.11.0",
