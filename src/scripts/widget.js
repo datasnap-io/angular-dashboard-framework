@@ -25,49 +25,37 @@
 'use strict';
 
 angular.module('adf')
-  .directive('adfWidget', function($log, $modal, adfDashboardService, adfWidgetService) {
+  .directive('adfWidget', function($log, $modal, adfDashboardBuilderService, adfDashboardService, adfWidgetService) {
 
     function preLink($scope, $element, $attr){
       var definition = $scope.definition;
-      if (definition) {
-        var w = adfDashboardService.widgets[definition.type];
-        if (w) {
-          // pass title
+      console.info('prelink - initial definition', definition);
+
+      var widgetModel  = adfWidgetService.buildWidgetModel(definition);
+
+      if(widgetModel){
+        //Make sure the scope has all the properties of the generated model
+        angular.extend($scope,widgetModel);
+        console.dir('scopy',$scope);
+
+        //Make sure we have a title for our widget
           if (!definition.title){
-            definition.title = w.title;
+            $scope.definition = widgetModel.widget.title;
           }
 
-          // pass edit mode
-          $scope.editMode = $attr.editMode;
+        //Init some UI state
+        $scope.editMode = $attr.editMode;
+        $scope.isCollapsed = false;
 
-          // pass copy of widget to scope
-          $scope.widget = angular.copy(w);
-
-          // create config object
-          var config = definition.config;
-          if (config) {
-            if (angular.isString(config)) {
-              config = angular.fromJson(config);
-            }
-          } else {
-            config = {};
-          }
-
-          // pass config to scope
-          $scope.config = config;
-
-          // collapse
-          $scope.isCollapsed = false;
-        } else {
-          $log.warn('could not find widget ' + type);
-        }
       } else {
-        $log.debug('definition not specified, widget was probably removed');
+        $log('Could not load Widget: '+ definition.type);
       }
     }
 
     function postLink($scope, $element, $attr) {
       var definition = $scope.definition;
+      console.info('postlink - initial definition', definition);
+      console.info('scope',$scope)
       if (definition) {
 
         // bind close function

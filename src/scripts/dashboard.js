@@ -39,7 +39,7 @@
 'use strict';
 
 angular.module('adf')
-  .directive('adfDashboard', function($rootScope, $log, $modal, adfDashboardService, templatePathRoot){
+  .directive('adfDashboard', function($rootScope, $log, $modal, adfDashboardBuilderService, adfDashboardService, templatePathRoot){
 
     function copyWidgets(source, target){
       if ( source.widgets && source.widgets.length > 0 ){
@@ -87,7 +87,7 @@ angular.module('adf')
 
     function createConfiguration(type){
       var cfg = {};
-      var config = adfDashboardService.widgets[type].config;
+      var config = adfDashboardBuilderService.widgets[type].config;
       if (config){
         cfg = angular.copy(config);
       }
@@ -120,7 +120,7 @@ angular.module('adf')
         var model = $scope.adfModel;
         if ( ! model || ! model.rows ){
           var structureName = $scope.structure;
-          var structure = adfDashboardService.structures[structureName];
+          var structure = adfDashboardBuilderService.structures[structureName];
           if (structure){
             if (model){
               model.rows = angular.copy(structure).rows;
@@ -159,10 +159,49 @@ angular.module('adf')
         };
 
 
+        /*
+          Actions:
+            edit dashboard config
+
+
+            add widget
+            remove widget
+            edit widget
+
+         */
+
+
+        $scope.addWidget = function(){
+
+            adfDashboardService
+              .addNewWidget()
+                .then(
+                  function( newWidget ){
+                    $scope.model.rows[0].columns[0].widgets.unshift( newWidget );
+                    console.info("added widget",newWidget);
+                  },
+                  function(){
+                    console.log("aborted add widget");
+                  }
+              );
+
+            // adfDashboardService
+            //   .getNewWidget()
+            //   .then(
+            //     function( newWidget ){
+            //     $scope.model.rows[0].columns[0].widgets.unshift( newWidget );
+            //     console.info("added widget",newWidget);
+            //     },
+            //     function(){
+            //       console.log("aborted add widget");
+            //     }
+            //   );
+        }
+
         // edit dashboard settings
         $scope.editDashboardDialog = function(){
           var editDashboardScope = $scope.$new();
-          editDashboardScope.structures = adfDashboardService.structures;
+          editDashboardScope.structures = adfDashboardBuilderService.structures;
           var instance = $modal.open({
             scope: editDashboardScope,
             templateUrl: templatePathRoot+'/dashboard-edit.html'
@@ -181,7 +220,7 @@ angular.module('adf')
         // add widget dialog
         $scope.addWidgetDialog = function(){
           var addScope = $scope.$new();
-          addScope.widgets = adfDashboardService.widgets;
+          addScope.widgets = adfDashboardBuilderService.widgets;
           var opts = {
             scope: addScope,
             templateUrl: templatePathRoot+'/widget-add.html'

@@ -26,7 +26,7 @@
 
 angular.module('sample.widgets.github', ['adf.provider', 'highcharts-ng'])
   .value('githubApiUrl', 'https://api.github.com/repos/')
-  .config(function(adfDashboardServiceProvider){
+  .config(function(adfDashboardBuilderServiceProvider){
     // template object for github widgets
     var widget = {
       templateUrl: 'scripts/widgets/github/github.html',
@@ -44,7 +44,7 @@ angular.module('sample.widgets.github', ['adf.provider', 'highcharts-ng'])
     };
 
     // register github template by extending the template object
-    adfDashboardServiceProvider
+    adfDashboardBuilderServiceProvider
       .widget('githubHistory', angular.extend({
         title: 'Github History',
         description: 'Display the commit history of a GitHub project as chart',

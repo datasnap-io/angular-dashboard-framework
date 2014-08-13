@@ -25,8 +25,8 @@
 'use strict';
 
 angular.module('sample.widgets.linklist', ['adf.provider'])
-  .config(function(adfDashboardServiceProvider){
-    adfDashboardServiceProvider
+  .config(function(adfDashboardBuilderServiceProvider){
+    adfDashboardBuilderServiceProvider
       .widget('linklist', {
         title: 'Links',
         description: 'Displays a list of links',

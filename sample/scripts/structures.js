@@ -24,9 +24,9 @@
 'use strict';
 
 angular.module('structures', ['adf'])
-.config(function(adfDashboardServiceProvider){
+.config(function(adfDashboardBuilderServiceProvider){
 
-  adfDashboardServiceProvider
+  adfDashboardBuilderServiceProvider
     .structure('6-6', {
       rows: [{
         columns: [{

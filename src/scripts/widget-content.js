@@ -25,7 +25,7 @@
 'use strict';
 
 angular.module('adf')
-  .directive('adfWidgetContent', function($log, $q, $sce, $http, $templateCache, $compile, $controller, $injector, adfDashboardService) {
+  .directive('adfWidgetContent', function($log, $q, $sce, $http, $templateCache, $compile, $controller, $injector, adfDashboardService, adfDashboardBuilderService) {
 
     function getTemplate(widget){
       var deferred = $q.defer();
@@ -51,7 +51,7 @@ angular.module('adf')
       var content = $scope.content;
 
       // display loading template
-      $element.html(adfDashboardService.loadingTemplate);
+      $element.html(adfDashboardBuilderService.loadingTemplate);
 
       // create new scope
       var templateScope = $scope.$new();
@@ -102,7 +102,7 @@ angular.module('adf')
           msg += ': ' + reason;
         }
         $log.warn(msg);
-        $element.html(adfDashboardService.messageTemplate.replace(/{}/g, msg));
+        $element.html(adfDashboardBuilderService.messageTemplate.replace(/{}/g, msg));
       });
     }
 

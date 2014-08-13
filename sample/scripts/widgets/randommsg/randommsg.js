@@ -25,8 +25,8 @@
 'use strict';
 
 angular.module('sample.widgets.randommsg', ['adf.provider'])
-  .config(function(adfDashboardServiceProvider){
-    adfDashboardServiceProvider
+  .config(function(adfDashboardBuilderServiceProvider){
+    adfDashboardBuilderServiceProvider
       .widget('randommsg', {
         title: 'Random Message',
         description: 'Display a random quote of Douglas Adams',

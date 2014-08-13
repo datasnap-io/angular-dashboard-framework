@@ -25,8 +25,8 @@
 'use strict';
 
 angular.module('sample.widgets.markdown', ['adf.provider', 'btford.markdown'])
-  .config(function(adfDashboardServiceProvider){
-    adfDashboardServiceProvider
+  .config(function(adfDashboardBuilderServiceProvider){
+    adfDashboardBuilderServiceProvider
       .widget('markdown', {
         title: 'Markdown',
         description: 'Markdown widget',

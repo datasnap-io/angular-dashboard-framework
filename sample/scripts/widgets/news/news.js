@@ -26,8 +26,8 @@
 
 angular.module('sample.widgets.news', ['adf.provider'])
   .value('newsServiceUrl', 'https://ajax.googleapis.com/ajax/services/feed/load?v=1.0&callback=JSON_CALLBACK&q=')
-  .config(function(adfDashboardServiceProvider){
-    adfDashboardServiceProvider
+  .config(function(adfDashboardBuilderServiceProvider){
+    adfDashboardBuilderServiceProvider
       .widget('news', {
         title: 'News',
         description: 'Displays a RSS/Atom feed',

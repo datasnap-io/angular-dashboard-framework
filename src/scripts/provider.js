@@ -32,7 +32,98 @@
  * The dashboardProvider can be used to register structures and widgets.
  */
 angular.module('adf.provider', [])
-  .provider('adfDashboardService', function(){
+  .provider('adfDashboardService',function(){
+
+    //Globals
+    var addWidgetController = function(){};
+    var addWidgetService = function(){
+        return {
+            getInitialConfig: function(widgets){
+                console.log('This is the default add widget configuration');
+                //Do UI or other stuff to figure out which widget to add and its configuration
+                configPromise.resolve({});
+                }
+            }
+    };
+
+    return {
+        //Customization API
+        addController: function(controllerName){
+            addWidgetController = controllerName;
+        },
+        setAddWidgetService: function(overrideService){
+            addWidgetService = overrideService;
+        },
+
+        $get : function($q, $injector, adfDashboardBuilderService){
+            var newWidgetServiceInstance = $injector.invoke(addWidgetService);
+
+            return {
+
+                createConfiguration: function(type){
+                  var cfg = {};
+                  var config = adfDashboardBuilderService.widgets[type].config;
+                  if (config){
+                    cfg = angular.copy(config);
+                  }
+                  return cfg;
+                },
+
+                //Service API
+                buildWidgetConfig: function(widgetType){
+                    var deferred = $q.defer();
+                        deferred.resolve({
+                            type: widgetType,
+                            config: createConfiguration(widgetType)
+                        });
+                    return deferred.promise;
+                },
+
+                addNewWidget: function(){
+                    var deferred = $q.defer();
+
+                    newWidgetServiceInstance
+                    .newWidgetFlow(adfDashboardBuilderService.widgets)
+                        .then(
+                            function(config){
+                                deferred.resolve(config);
+                            },
+                            function(){
+                                console.log("some sort of error")
+                                  deferred.reject();
+                            });
+                        return deferred.promise;
+                },
+
+                getNewWidget: function(){
+                    var deferred = $q.defer();
+
+                    var initializedWidget = newWidgetServiceInstance
+                        .getInitialConfig( adfDashboardBuilderService.widgets )
+                        .then(
+                            function adfGetNewWidgetSuccess(widgetType){
+                                var w = {
+                                  type: widgetType,
+                                  config: createConfiguration(widgetType)
+                                };
+
+                                deferred.resolve(w);
+                            },
+                            function adfGetNewWidgetSuccess(){
+                                  deferred.reject();
+                            });
+
+                return deferred.promise;
+                }
+            }
+        }
+    }
+  })
+
+
+
+
+  .provider('adfDashboardBuilderService', function(){
 
     var widgets = {};
     var structures = {};
@@ -43,7 +134,6 @@ angular.module('adf.provider', [])
           <span class="sr-only">loading ...</span>\n\
         </div>\n\
       </div>';
-    var addWidgetController = function(){};
 
     return {
 
@@ -164,11 +254,6 @@ angular.module('adf.provider', [])
           loadingTemplate = template;
           return this;
         },
-
-        addController: function(controllerName){
-            addWidgetController = controllerName;
-        },
-
         /**
         * @ngdoc object
         * @name adf.dashboard
@@ -178,12 +263,15 @@ angular.module('adf.provider', [])
         *
         * @returns {Object} self
         */
-        $get : function(){
+        $get : function($q, $injector){
+
           return {
+            //Static Properties
             widgets: widgets,
             structures: structures,
             messageTemplate: messageTemplate,
-            loadingTemplate: loadingTemplate
+            loadingTemplate: loadingTemplate,
+
           };
         }
     };
@@ -195,15 +283,91 @@ angular.module('adf.provider', [])
     },
     editController = defaultCtrl;
 
+    var retrieveWidget = function(widgetsMap, widgetType){
+        return widgetsMap[widgetType];
+    }
+
+    //Builds original config for a widget
+    var widgetDefaultsConstructor = function( widgetsMap, widgetType ){
+          var cfg = {};
+          var config = widgetsMap[widgetType].config;
+          if (config){
+            cfg = angular.copy(config);
+          }
+          return cfg;
+    };
+
+    // Needed to build a model
+    var widgetDefinitionConstructor = function(widgetsMap, widgetType ){
+        return {
+            type: widgetType,
+            config: widgetDefaultsConstructor( widgetsMap, widgetType)
+        };
+    }
+
+    //What we put into a scope
+    var widgetModelConstructor = function( widgetsMap, widgetDefinition ){
+
+      var definition = widgetDefinition;
+      var widgetModel = {};
+      if (definition) {
+        var w = widgetsMap[definition.type];
+        if (w) {
+
+          // Move to Directive
+              if (!definition.title){
+                definition.title = w.title;
+              }
+
+              // pass edit mode
+              //$scope.editMode = $attr.editMode;
+
+              // pass copy of widget to scope
+              //$scope.widget =
+              widgetModel.widget = angular.copy(w);
+
+          // create config object
+          var config = definition.config;
+          if (config) {
+            if (angular.isString(config)) {
+              config = angular.fromJson(config);
+            }
+          } else {
+            config = {};
+          }
+
+          // pass config to scope
+          //$scope.config = config;
+          widgetModel.config = config;
+
+          return widgetModel;
+          // collapse
+          //$scope.isCollapsed = false;
+        } else {
+          console.log('could not find widget ' + type);
+          return undefined;
+        }
+      } else {
+        $log.debug('definition not specified, widget was probably removed');
+        return undefined;
+      }
+    }
+
+
+
+
     return {
 
         editController: function(controllerName){
             editController = controllerName;
         },
 
-        $get : function($controller){
+        $get : function($controller, adfDashboardBuilderService){
 
             return {
+                buildWidgetDefinition: widgetDefinitionConstructor.bind(this, adfDashboardBuilderService.widgets ),
+                buildWidgetModel: widgetModelConstructor.bind( this, adfDashboardBuilderService.widgets ),
+                getWidget: retrieveWidget.bind(this, adfDashboardBuilderService.widgets),
 
 
 
@@ -222,6 +386,7 @@ angular.module('adf.provider', [])
                       scope.$broadcast('widgetConfigChanged');
                     }
                 },
+
                 cancel:function(scope){
                     console.log('hey I got cancelled');
                 }
