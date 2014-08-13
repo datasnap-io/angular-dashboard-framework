@@ -26,12 +26,89 @@
 angular.module('sample', [
   'adf', 'sample.widgets.news', 'sample.widgets.randommsg',
   'sample.widgets.weather', 'sample.widgets.markdown',
-  'sample.widgets.linklist', 'sample.widgets.github', 
+  'sample.widgets.linklist', 'sample.widgets.github',
   'LocalStorageModule', 'structures', 'sample-01', 'sample-02', 'ngRoute'
 ])
-.config(function($routeProvider, localStorageServiceProvider){
+.config(function($routeProvider, localStorageServiceProvider, adfDashboardServiceProvider, adfWidgetServiceProvider){
+
   localStorageServiceProvider.setPrefix('adf');
-  
+
+  //Configure the editing behavior
+adfDashboardServiceProvider
+    .setAddWidgetService( function($q, $modal, adfDashboardBuilderService, adfWidgetService){
+
+      var resolveNewWidget = function(widgets){
+          var configPromise = $q.defer();
+          var opts = {
+            templateUrl: '../src/templates/widget-add.html',
+
+            resolve:{
+              widgets: function(){ return widgets;}
+            },
+
+            controller: function($scope, widgets){
+                $scope.widgets = widgets;
+            }
+          };
+
+          var instance = $modal.open(opts);
+          instance.result.then(
+            function(result){
+              //Create a default definition since this is new
+              var widgetDefinition = adfWidgetService.buildWidgetDefinition(result);
+              configPromise.resolve( widgetDefinition );
+            },
+            function(){
+              configPromise.reject();
+            }
+            );
+          return configPromise.promise;
+      };
+
+      var resolveWidgetInitialSettings = function( widgetDefinition ){
+
+          var configPromise = $q.defer();
+          var opts = {
+            templateUrl: '../src/templates/widget-edit.html',
+            resolve:{
+              widgetDefinition: function(){ return widgetDefinition;}
+            },
+            controller: function( $scope, widgetDefinition, adfWidgetService ){
+                var widgetModel = adfWidgetService.buildWidgetModel(widgetDefinition)
+                widgetModel.definition = widgetDefinition;
+                angular.extend($scope, widgetModel);
+            }
+          };
+
+          var instance = $modal.open(opts);
+
+          instance.result.then(
+            function(result){
+              debugger;
+              configPromise.resolve(result);
+            },
+            function(cancel){
+              configPromise.reject();
+            }
+            );
+          return configPromise.promise;
+      }
+
+    return {
+
+      newWidgetFlow: function(listOfWidgets){
+          // A very simple add widget flow
+          // 1) Resolve a widget configuration
+          // 2) Launch the editor so the user can configure the widget
+          return resolveNewWidget(listOfWidgets)
+                .then(resolveWidgetInitialSettings);
+      }
+    };
+  })
+
+  adfWidgetServiceProvider
+    .editController('editWidgetController');
+
   $routeProvider.when('/sample/01', {
     templateUrl: 'partials/sample.html',
     controller: 'sample01Ctrl'
@@ -43,23 +120,53 @@ angular.module('sample', [
   .otherwise({
     redirectTo: '/sample/01'
   });
-  
+
+})
+
+.controller('editWidgetController',function( $scope, $modal, adfWidgetService){
+
+          //Build scope
+          var editScope = $scope.$new();
+
+
+
+          //if this is an add
+          //set the scope to the current list of widgets
+
+          //Setup modal
+          var opts = {
+            scope: editScope,
+            templateUrl: '../src/templates/widget-edit.html'
+          };
+
+          //Instantiate Modal
+          var instance = $modal.open(opts);
+
+          $scope.cancelEdits = function() {
+            console.log('Cancel the edits');
+          }
+
+          $scope.saveEdits = function() {
+            instance.close();
+            editScope.$destroy();
+            adfWidgetService.save($scope);
+          };
 })
 .controller('navigationCtrl', function($scope, $location){
-  
+
   $scope.navCollapsed = true;
-  
+
   $scope.toggleNav = function(){
     $scope.navCollapsed = !$scope.navCollapsed;
   };
-  
-  $scope.$on('$routeChangeStart', function() { 
+
+  $scope.$on('$routeChangeStart', function() {
     $scope.navCollapsed = true;
   });
-  
+
   $scope.navClass = function(page) {
     var currentRoute = $location.path().substring(1) || 'Sample 01';
     return page === currentRoute || new RegExp(page).test(currentRoute) ? 'active' : '';
   };
-  
+
 });
